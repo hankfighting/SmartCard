@@ -1,2 +1,2 @@
 include ':app', ':OMAModule'
-rootProject.name='OMAApplication'
+rootProject.name='SmartCard'
