@@ -62,6 +62,24 @@ SmartCard.getInstance().closeService();
 
 结束，调用就是这么简单，主要是需要确认客户端程序对SE的访问权限，与打包所用的签名有关。
 
+
+# API列表
+
+方法名 | 方法描述|调用示例
+-----|-----|-----
+setmReaderType | 设置Reader类型，有ESE、SIM、SD三种| SmartCard.getInstance().setmReaderType(EnumReaderType.READER_TYPE_ESE);
+execute（String command） | 执行APDU指令|SmartCard.getInstance().execute("00A4040008A000000151000000");
+execute（String command, String expSw） | 执行APDU指令并校验响应状态字,多个期望状态字需要用“&brvbar;”隔开|SmartCard.getInstance().execute("00A4040008A000000151000000","9000");
+closeChannel（） | 关闭SE通道，执行完成指令调用|SmartCard.getInstance().closeChannel();
+closeService（） | 关闭SE服务，退出程序必须调用|SmartCard.getInstance().closeService();
+
+# 响应码STATUS
+方法名 | 方法描述
+-----|-----
+0|成功
+-1|错误
+-2|期望状态字与响应状态字校验失败
+
 # LICENSE
 
 ```
