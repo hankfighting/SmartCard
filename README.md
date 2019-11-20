@@ -25,7 +25,7 @@ Step 2：Add the dependency
 
 ```
 dependencies {
-	 implementation 'com.github.hankfighting:SmartCard:V1.0'
+	 implementation 'com.github.hankfighting:SmartCard:1.0.1'
 }
 ```
 
