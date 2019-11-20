@@ -29,7 +29,7 @@ dependencies {
 }
 ```
 
-Step 3：代码调用（必须在子线程中调用）
+Step 3：代码调用
 
 1. 设置Reader类型，默认为eSE
 
@@ -37,7 +37,7 @@ Step 3：代码调用（必须在子线程中调用）
 SmartCard.getInstance().setmReaderType(EnumReaderType.READER_TYPE_ESE);
 ```
 
-2. 执行APDU指令
+2. 执行APDU指令（必须在子线程中调用）
 ```
 new Thread(new Runnable() {
     @Override
