@@ -21,9 +21,10 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                CardResult cardResult = SmartCard.getInstance().execute("00A4040008A000000151000000");
+                CardResult cardResult = SmartCard.getInstance().execute("00A4040008a000000151000000", "6A82");
                 if(cardResult.getStatus() == 0) {
                     LogUtil.e(cardResult.getRapdu());
+                    LogUtil.e(cardResult.getSw());
                 } else {
                     LogUtil.e(cardResult.getMessage());
                 }

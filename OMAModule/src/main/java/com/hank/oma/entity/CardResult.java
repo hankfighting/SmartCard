@@ -1,7 +1,16 @@
 package com.hank.oma.entity;
 
-public class CardResult {
+import android.content.Intent;
+import android.text.TextUtils;
 
+import com.hank.oma.exception.CardException;
+import com.hank.oma.utils.LogUtil;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class CardResult {
+    private String sw;
     private String rapdu;
     private int status;
     private String message;
@@ -30,9 +39,17 @@ public class CardResult {
         this.message = message;
     }
 
-    public CardResult(String rapdu, int status, String message) {
-        super();
-        this.rapdu = rapdu;
+    public String getSw() {
+        return sw;
+    }
+
+    public void setSw(String sw) {
+        this.sw = sw;
+    }
+
+    public CardResult(int status, String message, String rapdu) {
+        this.sw = rapdu.substring(rapdu.length() - 4);
+        this.rapdu = rapdu.substring(0, rapdu.length() - 4);
         this.status = status;
         this.message = message;
     }
@@ -43,9 +60,19 @@ public class CardResult {
         this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return "CardResult [rapdu=" + rapdu + ", status=" + status + ", message=" + message + "]";
+
+    public void check(String expSw) throws CardException {
+        LogUtil.e("expSw:" + expSw);
+        LogUtil.e("sw:" + this.sw);
+        if (!isMatchSw(expSw, this.sw)) {
+            throw new CardException(Integer.parseInt(this.sw, 16));
+        }
+    }
+
+    private boolean isMatchSw(String expSw, String sw) {
+        Pattern p = Pattern.compile(expSw);
+        Matcher m = p.matcher(sw);
+        return m.find();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hank.oma.core;
 
-import android.content.Context;
+
+import androidx.annotation.NonNull;
 
 import com.hank.oma.entity.CardResult;
 
@@ -9,7 +10,7 @@ public abstract class BaseSmartCard {
     final int STATUS_CODE_SUCCESS = 0;
     final int STATUS_CODE_FAIL = -1;
 
-    public abstract CardResult execute(String command);
+    public abstract CardResult execute(@NonNull String command);
 
     public abstract void closeChannel();
 

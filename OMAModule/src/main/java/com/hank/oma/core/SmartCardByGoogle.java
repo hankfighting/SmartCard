@@ -4,11 +4,9 @@ import android.se.omapi.Channel;
 import android.se.omapi.Reader;
 import android.se.omapi.SEService;
 import android.se.omapi.Session;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.core.util.Preconditions;
 
 import com.hank.oma.entity.CardResult;
 import com.hank.oma.utils.Hex;
@@ -38,13 +36,13 @@ public final class SmartCardByGoogle extends BaseSmartCard implements SEService.
      */
     private void bindService() throws InterruptedException {
         // 判断SEService是否已经连接
-        if (mSEService == null) {
+        if (mSEService == null || !mSEService.isConnected()) {
             mSEService = new SEService(Utils.getApp().getApplicationContext(), new OMAExecutor(), this);
             LogUtil.e(TAG, "start bind SEService");
             if (!mServiceIsConnection) {
                 synchronized (mLock) {
                     if (!mServiceIsConnection) {
-                        LogUtil.d("thread is waiting");
+                        LogUtil.d(TAG, "thread is waiting");
                         mLock.wait();
                     }
                 }
@@ -59,7 +57,6 @@ public final class SmartCardByGoogle extends BaseSmartCard implements SEService.
      */
     @Override
     public CardResult execute(String command) {
-        Preconditions.checkNotNull(command, "command must not be null");
         try {
             bindService();
             return executeApduCmd(command);
@@ -125,42 +122,36 @@ public final class SmartCardByGoogle extends BaseSmartCard implements SEService.
      * @throws Exception
      */
     private synchronized CardResult executeApduCmd(String mReuqestCommand) throws Exception {
-        if (TextUtils.isEmpty(mReuqestCommand) || mReuqestCommand.length() < 6) {
-            return new CardResult(STATUS_CODE_FAIL, "Command is null or length is not enough");
-        }
-
-        LogUtil.e(TAG, "Command APDU:" + mReuqestCommand);
-
+        LogUtil.d(TAG, "Command APDU:" + mReuqestCommand);
         /**
          * 判断以00A404开头需开通道
          */
-        if ("00A404".equalsIgnoreCase(mReuqestCommand.substring(0, 6))) {
+        if (mReuqestCommand.startsWith("00A404")) {
             closeChannelAndSession();
             // 获取AID
-            int totallength = Integer.parseInt(mReuqestCommand.substring(8, 10), 16);
-            String aid = mReuqestCommand.substring(10, 10 + totallength * 2);
+            int totallength = Integer.parseInt(mReuqestCommand.substring(8, 10), 16) * 2;
+            String aid = mReuqestCommand.substring(10, 10 + totallength);
             // 打开通道
             Object[] openResult = openCurrentAvailableChannel(aid);
             int resultCode = (int) openResult[0];
             String resultDesc = (String) openResult[1];
             if (resultCode == STATUS_CODE_SUCCESS) {
-                String rapdu = Hex.bytesToHexString(mChannel.getSelectResponse());
-                LogUtil.e(TAG, "Response APDU：" + rapdu);
-                return new CardResult(rapdu, STATUS_CODE_SUCCESS, resultDesc);
+                String response = Hex.bytesToHexString(mChannel.getSelectResponse());
+                LogUtil.d(TAG, "Response APDU：" + response);
+                return new CardResult(STATUS_CODE_SUCCESS, resultDesc, response);
             }
 
             LogUtil.e(TAG, "OpenChannel Error Desc:" + resultDesc);
             return new CardResult(resultCode, resultDesc);
         }
 
-
         byte[] byteCommand = Hex.hexStringToBytes(mReuqestCommand);
 
         if (mChannel != null) {
             byte[] byteRapdu = mChannel.transmit(byteCommand);
-            String rapdu = Hex.bytesToHexString(byteRapdu);
-            LogUtil.i(TAG, "Response APDU：" + rapdu);
-            return new CardResult(rapdu, STATUS_CODE_SUCCESS, null);
+            String response = Hex.bytesToHexString(byteRapdu);
+            LogUtil.d(TAG, "Response APDU：" + response);
+            return new CardResult(STATUS_CODE_SUCCESS, "transmit apdu success", response);
         } else {
             return new CardResult(STATUS_CODE_FAIL, "Channal is not open");
         }
@@ -191,16 +182,16 @@ public final class SmartCardByGoogle extends BaseSmartCard implements SEService.
             return new Object[]{STATUS_CODE_FAIL, "channel is null"};
         }
 
-        return new Object[]{0, "open channel success"};
+        return new Object[]{STATUS_CODE_SUCCESS, "open channel success"};
     }
 
     /**
      * 获取当前选择的通道的Reader对象
      *
-     * @return
+     * @return Reader
      */
     private Reader getCurrentAvailableReader() {
-        LogUtil.e(TAG, "select reader name:" + getmReaderType().getValue());
+        LogUtil.d(TAG, "select reader name:" + getmReaderType().getValue());
         Reader[] readers = mSEService.getReaders();
         // 判断是否有可用的通道
         if (readers.length < 1) {
@@ -210,7 +201,7 @@ public final class SmartCardByGoogle extends BaseSmartCard implements SEService.
 
         // 获取当前需要操作通道的Reader对象
         for (Reader reader : readers) {
-            LogUtil.e(TAG, "avaliable reader name:" + reader.getName());
+            LogUtil.d(TAG, "avaliable reader name:" + reader.getName());
             if (reader.getName().startsWith(getmReaderType().getValue())) {
                 return reader;
             }
