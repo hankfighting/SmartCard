@@ -25,13 +25,19 @@ Step 2：Add the dependency
 
 ```
 dependencies {
-	 implementation 'com.github.hankfighting:SmartCard:V1.0'
+	 implementation 'com.github.hankfighting:SmartCard:1.0.1'
 }
 ```
 
-Step 3：代码调用（必须在子线程中调用）
+Step 3：代码调用
 
+1. 设置Reader类型，默认为eSE
 
+```
+SmartCard.getInstance().setmReaderType(EnumReaderType.READER_TYPE_ESE);
+```
+
+2. 执行APDU指令（必须在子线程中调用）
 ```
 new Thread(new Runnable() {
     @Override
@@ -45,7 +51,39 @@ new Thread(new Runnable() {
     }
 }).start();
 ```
+3. 关闭SE通道和服务
 
+```
+//执行完成指令调用
+SmartCard.getInstance().closeChannel();
+//退出客户端必须调用
+SmartCard.getInstance().closeService();
+```
 
 结束，调用就是这么简单，主要是需要确认客户端程序对SE的访问权限，与打包所用的签名有关。
 
+# LICENSE
+
+```
+MIT License
+
+Copyright (c) 2019 Hank
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
