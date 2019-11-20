@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.hank.oma.SmartCard;
+import com.hank.oma.entity.CardResult;
+import com.hank.oma.utils.LogUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +21,12 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                SmartCard.getInstance().execute("00A4040008A000000151000000");
+                CardResult cardResult = SmartCard.getInstance().execute("00A4040008A000000151000000");
+                if(cardResult.getStatus() == 0) {
+                    LogUtil.e(cardResult.getRapdu());
+                } else {
+                    LogUtil.e(cardResult.getMessage());
+                }
             }
         }).start();
     }
